@@ -1,10 +1,11 @@
 const audioDevices = require('macos-audio-devices')
 const notifier = require('node-notifier')
 
-async function amdNotify (message) {
-  notifier.notify({
+async function amdNotify (message, sound = 'Tink') {
+  return notifier.notify({
     title: 'AutoMultiDevice',
-    message: message
+    message,
+    sound
   })
 }
 
@@ -15,7 +16,7 @@ async function amdNotify (message) {
   for (const v of outputDevices) {
     if (v.transportType === 'aggregate' && v.id === defaultDevice.id) {
       await audioDevices.destroyAggregateDevice(v.id)
-      await amdNotify('Record mode off.')
+      await amdNotify('Record mode off.', 'Basso')
       return 0
     }
   }
@@ -42,9 +43,9 @@ async function amdNotify (message) {
     }
     const device = await audioDevices.createAggregateDevice('Multi-output device', outputDevice.id, [defaultDevice.id], { multiOutput: true })
     await audioDevices.setDefaultOutputDevice(device.id)
-    amdNotify('Created multi-output device.')
+    await amdNotify('Created multi-output device.', 'Glass')
   } else {
-    amdNotify('Cannot find suitable output device for recordings. (BlackHole, Soundflower, etc...)')
+    await amdNotify('Cannot find suitable output device for recordings. (BlackHole, Soundflower, etc...)')
     return -2
   }
 })().then(errCode => process.exit(errCode))
