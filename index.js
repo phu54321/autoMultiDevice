@@ -42,7 +42,12 @@ async function amdNotify (message, sound = 'Tink') {
       return -1
     }
     const device = await audioDevices.createAggregateDevice('Multi-output device', outputDevice.id, [defaultDevice.id], { multiOutput: true })
-    await audioDevices.setDefaultOutputDevice(device.id)
+    const uid = device.uid
+
+    // IDK why but on macOS 12 device.id got from createAggregateDevice is invalid. uid is valid though.
+    const devices = await audioDevices.getAllDevices()
+    const deviceID = devices.find(x => x.uid === uid).id
+    await audioDevices.setDefaultOutputDevice(deviceID)
     await amdNotify('Created multi-output device.', 'Glass')
   } else {
     await amdNotify('Cannot find suitable output device for recordings. (BlackHole, Soundflower, etc...)')
